@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Environments
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Data or output
+data/
+outputs/
+*.csv
+*.xlsx
+
+# IDEs
+.vscode/
+.idea/
+
+.deepeval/

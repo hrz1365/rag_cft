@@ -1,0 +1,89 @@
+from src.pipelines import PDFLoader, TextChunker, Embedder, VectorStore, LLMEngine
+
+
+class RAGPipeline:
+    """
+    A pipeline for implementing a Retrieval-Augmented Generation (RAG) system.
+
+    This class provides functionality to load a PDF document, process
+      and chunk its content, create a vector store for efficient retrieval,
+      and query the system using a language model.
+
+    Attributes:
+        pdf_loader (PDFLoader): An instance for loading PDF documents.
+        chunker (TextChunker): An instance for splitting text into chunks.
+        embedder (object): The embedding model used for creating vector representations.
+        vector_store (VectorStore): A storage system for managing vectorized document
+          chunks.
+        llm_engine (LLMEngine): A language model engine for generating responses.
+
+    Methods:
+        build_index()
+        query(question: str, k=3) -> str
+
+    """
+
+    def __init__(
+        self,
+        pdf_path,
+        embed_model="all-MiniLM-L6-v2",
+        llm_model="tiiuae/falcon-7b-instruct",
+    ):
+        """
+        Initializes the pipeline with the necessary components for processing PDFs,
+        embedding text, and interacting with a language model.
+
+        Args:
+            pdf_path (str): The file path to the PDF document to be processed.
+            embed_model (str, optional): The name of the embedding model to use.
+                Defaults to "all-MiniLM-L6-v2".
+            llm_model (str, optional): The name of the large language model to use.
+                Defaults to "tiiuae/falcon-7b-instruct".
+        """
+        self.pdf_loader = PDFLoader(pdf_path)
+        self.chunker = TextChunker()
+        self.embedder = Embedder(embed_model).get()
+        self.vector_store = VectorStore(self.embedder)
+        self.llm_engine = LLMEngine(llm_model)
+
+    def build_index(self):
+        """
+        Builds the index for the document retrieval system.
+
+        This method performs the following steps:
+        1. Loads documents using the PDF loader.
+        2. Splits the loaded documents into smaller chunks using the chunker.
+        3. Creates a vector store from the document chunks for efficient retrieval.
+
+        Raises:
+            Exception: If any step in the process fails.
+        """
+        docs = self.pdf_loader.load()
+        docs_split = self.chunker.split(docs)
+        self.vector_store.create_vector_store(docs_split)
+
+    def query(self, question: str, k=3):
+        """
+        Query the vector store and generate a response using the language model.
+
+        Args:
+            question (str): The input question to query the vector store.
+            k (int, optional): The number of relevant documents to retrieve.
+              Defaults to 3.
+
+        Returns:
+            str: The generated response from the language model based on
+              the retrieved context.
+        """
+        retriever = self.vector_store.retriever()
+        results = retriever.invoke(question)[:k]
+
+        context = "\n".join([doc.page_content for doc in results])
+        prompt = (
+            f"Answer the following question concisely using only the provided context.\n\n"
+            f"Context:\n{context}\n\n"
+            f"Question: {question}\n\nAnswer:"
+        )
+
+        response = self.llm_engine.generate(prompt)
+        return response

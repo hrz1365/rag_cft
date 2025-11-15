@@ -24,10 +24,8 @@ ENV/
 Thumbs.db
 
 # Data or output
-data/
 outputs/
-*.csv
-*.xlsx
+
 
 # IDEs
 .vscode/

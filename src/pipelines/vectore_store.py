@@ -22,7 +22,7 @@ class TextChunker:
         chunks = text_chunker.split(docs)
     """
 
-    def __init__(self, chunk_size=250, chubk_overlap=50):
+    def __init__(self, chunk_size=400, chunk_overlap=50):
         """
         Initializes the vector store with specified chunk size and overlap.
 
@@ -32,7 +32,7 @@ class TextChunker:
               Defaults to 50.
         """
         self.chunk_size = chunk_size
-        self.chunk_overlap = chubk_overlap
+        self.chunk_overlap = chunk_overlap
 
     def split(self, docs):
         """
@@ -132,20 +132,24 @@ class VectorStore:
         self.db.save_local(self.store_path)
         return self.db
 
-    def retriever(self):
+    def retriever(self, k=3):
         """
-        Retrieve a retriever object from the vector store.
+        Retrieve the top-k most relevant items from the vector store.
 
-        This method returns a retriever object that can be used to query
-          the vector store.
-        If the vector store has not been initialized, an exception is raised.
+        This method uses the vector store to find and return the top-k items
+        that are most relevant to a given query. The number of items to retrieve
+        can be specified using the `k` parameter.
+
+        Args:
+            k (int, optional): The number of most relevant items to retrieve. Defaults to 3.
 
         Returns:
-            Any: A retriever object for querying the vector store.
+            Callable: A retriever object configured with the specified search parameters.
 
         Raises:
             ValueError: If the vector store (`db`) has not been created yet.
         """
+
         if self.db is None:
             raise ValueError("Vector store has not been created yet.")
-        return self.db.as_retriever()
+        return self.db.as_retriever(search_kwargs={"k": k})

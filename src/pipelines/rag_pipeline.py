@@ -1,4 +1,4 @@
-from src.pipelines import PDFLoader, TextChunker, Embedder, VectorStore, LLMEngine
+from src.pipelines import PDFLoader, TextChunker, Embedder, VectorStore, LLMEngineGemini
 import glob
 
 
@@ -24,12 +24,7 @@ class RAGPipeline:
 
     """
 
-    def __init__(
-        self,
-        pdf_path,
-        embed_model="all-MiniLM-L6-v2",
-        llm_model="tiiuae/falcon-7b-instruct",
-    ):
+    def __init__(self, pdf_path, embed_model="all-MiniLM-L6-v2"):
         """
         Initializes the pipeline with the necessary components for processing PDFs,
         embedding text, and interacting with a language model.
@@ -38,15 +33,13 @@ class RAGPipeline:
             pdf_path (str): The directory path with PDF documents to be processed.
             embed_model (str, optional): The name of the embedding model to use.
                 Defaults to "all-MiniLM-L6-v2".
-            llm_model (str, optional): The name of the large language model to use.
-                Defaults to "tiiuae/falcon-7b-instruct".
         """
         self.pdf_path = pdf_path
         self.pdf_loader = PDFLoader()
         self.chunker = TextChunker()
         self.embedder = Embedder(embed_model).get()
         self.vector_store = VectorStore(self.embedder)
-        self.llm_engine = LLMEngine(llm_model)
+        self.llm_engine = LLMEngineGemini()
 
     def build_index(self):
         """
@@ -82,8 +75,8 @@ class RAGPipeline:
             str: The generated response from the language model based on
               the retrieved context.
         """
-        retriever = self.vector_store.retriever()
-        results = retriever.invoke(question)[:k]
+        retriever = self.vector_store.retriever(k=k)
+        results = retriever.invoke(question)
 
         context = "\n".join([doc.page_content for doc in results])
         prompt = (

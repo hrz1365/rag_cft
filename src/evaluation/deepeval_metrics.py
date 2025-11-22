@@ -6,7 +6,11 @@ from deepeval.metrics import (
     GEval,
 )
 from deepeval.test_case import LLMTestCaseParams
+from dotenv import load_dotenv
 import os
+
+
+load_dotenv()
 
 
 def get_gemini_model():
@@ -26,9 +30,9 @@ def get_gemini_model():
     Raises:
         ValueError: If the `GEMINI_API_KEY` environment variable is not set.
     """
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GeminiRoya")
     if not api_key:
-        raise ValueError("GEMINI_API_KEY environment variable not set.")
+        raise ValueError("Gemini environment variable not set.")
     model = GeminiModel(model_name="gemini-2.0-flash", api_key=api_key, temperature=0)
     return model
 
@@ -76,9 +80,10 @@ def get_cusom_metrics(model=None):
         name="Semantic Similarity",
         criteria="Determine how similar the actual output is to the expected output in meaning and coverage.",
         evaluation_steps=[
-            "Check whether all facts in the actual output are also present in the expected output.",
-            "Heavily penalize missing details or added misinformation.",
-            "Don't penalize minor phrasing or stylistic differences.",
+            "Focus on whether both outputs express the same meaning.",
+            "Do not penalize if the actual output adds harmless clarifications (e.g., units, nouns, or context words) that do not change the meaning.",
+            "Only penalize if the actual output introduces incorrect or contradictory information.",
+            "Do not require exact word overlap — prefer semantic equivalence.",
         ],
         evaluation_params=[
             LLMTestCaseParams.ACTUAL_OUTPUT,

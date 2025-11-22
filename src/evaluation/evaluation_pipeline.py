@@ -4,6 +4,8 @@ from deepeval.evaluate import DisplayConfig
 from deepeval.test_case import LLMTestCase
 from src.evaluation import get_gemini_model, get_metrics
 import time
+import os
+import json
 
 
 def build_test_cases(rag, df):
@@ -33,19 +35,20 @@ def build_test_cases(rag, df):
     test_cases = []
 
     for _, row in df.iterrows():
-        q = row["input"]
+        question = row["input"]
         expected = row.get("expected_output", "")
         ctx_text = row.get("contexts", "")
         contexts = [ctx_text] if isinstance(ctx_text, str) and ctx_text else []
 
         # Get model answer + actual retrieved contexts
-        answer = rag.query(q)
-        retrieved_docs = rag.vector_store.retriever().get_relevant_documents(q)
-        retrieved_contexts = [doc.page_content for doc in retrieved_docs]
+        answer = rag.query(question)
+        retriever = rag.vector_store.retriever()
+        results = retriever.invoke(question)
+        retrieved_contexts = [doc.page_content for doc in results]
 
         # Build test case
         case = LLMTestCase(
-            input=q,
+            input=question,
             actual_output=answer,
             expected_output=expected,
         )
@@ -116,5 +119,8 @@ def run_evaluation(rag, eval_data_path):
             row[f"{metric_name}_score"] = f"{score:.3f}"
             row[f"{metric_name}_reason"] = reason
             time.sleep(20)  # To avoid rate limiting
+        with open(f"{os.path.dirname(eval_data_path)}/case_{i}.json", "a") as f:
+            json.dump(row, f, indent=4)
+        print(f"Json file containing evaluation for case {i} written.")
         results.append(row)
     return results

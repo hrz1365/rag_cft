@@ -73,7 +73,7 @@ def main():
 
         print(f"Saving evaluation report to {report_path}...")
         os.makedirs(report_path.parent, exist_ok=True)
-        df_results = pd.DataFrame(results["detailed_results"])
+        df_results = pd.DataFrame(results)
         df_results.to_excel(report_path, index=False)
 
         print("Evaluation report saved successfully.")

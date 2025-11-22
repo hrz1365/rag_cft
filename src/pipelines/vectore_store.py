@@ -48,9 +48,12 @@ class TextChunker:
                   documents.
         """
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
+            separators=["\n\n", "\n"],
         )
         docs_split = splitter.split_documents(docs)
+        print(f"Split into {len(docs_split)} chunks.")
         return docs_split
 
 

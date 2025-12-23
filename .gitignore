@@ -25,6 +25,7 @@ Thumbs.db
 
 # Data or output
 outputs/
+models/
 
 
 # IDEs
@@ -35,3 +36,4 @@ outputs/
 
 # Vector stores
 *.faiss/
+

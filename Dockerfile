@@ -59,4 +59,4 @@ EXPOSE 8501
 # ============================================================
 # 10. Default CMD (overridden by docker-compose if needed)
 # ============================================================
-CMD ["python", "main.py"]
+CMD ["streamlit", "run", "app.py", "--server.port=8080", "--server.address=0.0.0.0"]

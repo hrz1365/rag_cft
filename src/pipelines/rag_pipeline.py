@@ -62,7 +62,7 @@ class RAGPipeline:
         else:
             print("Vector store already exists. Skipping index building.")
 
-    def query(self, question: str, k=3):
+    def query(self, question: str, k: int = 3):
         """
         Query the vector store and generate a response using the language model.
 
@@ -86,4 +86,4 @@ class RAGPipeline:
         )
 
         response = self.llm_engine.generate(prompt)
-        return response
+        return response, context

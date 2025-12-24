@@ -1,6 +1,8 @@
 services:
   rag-app:
     build: .
+    ports:
+      - "8080:8080"
     container_name: rag_app
 
     environment:
@@ -9,14 +11,5 @@ services:
     volumes:
       - ./data:/app/data
       - ./models:/app/models
-    
-    command: 
-      - python
-      - main.py
-      - --mode
-      - query
-      - --query
-      - "What is the capital of France?"
-      - --pdf
-      - '/app/data/electric_highways.pdf'
+
   
